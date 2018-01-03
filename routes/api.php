@@ -13,6 +13,10 @@ use Illuminate\Http\Request;
 |
 */
 
+/* DB::listen(function($query){
+    echo "<pre>{$query->sql}</pre>";
+    //echo "<pre>{$query->time}</pre>";
+}); */
 
 Route::resource('marca', 'MarcaController')->except(['create', 'edit']);
 Route::resource('agencia', 'AgenciaController')->except(['create', 'edit']);

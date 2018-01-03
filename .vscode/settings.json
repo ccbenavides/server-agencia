@@ -8,7 +8,7 @@
         "vendor" : true,
         "storage" : true,
         "tests" : true,
-        "config"  : true,
+        "config"  : false,
         "bootstrap" : true
     }
 }

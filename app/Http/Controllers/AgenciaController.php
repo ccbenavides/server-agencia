@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Agencia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class AgenciaController extends Controller
 {
@@ -14,7 +15,15 @@ class AgenciaController extends Controller
      */
     public function index()
     {
-        //
+           // Cache::flush();
+           $key = "messages.page".request('page',1);
+           $agencia = Cache::tags('agencia')->rememberForever($key , function(){
+               return Agencia::paginate(10);
+           });
+   
+           return response()->json([
+               'agencia' => $agencia
+           ]);
     }
 
     /**
@@ -22,10 +31,7 @@ class AgenciaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
-    {
-        //
-    }
+
 
     /**
      * Store a newly created resource in storage.
@@ -35,7 +41,25 @@ class AgenciaController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $agencia = new Agencia;
+        $agencia->nombre = $request->nombre;
+        $agencia->direccion = $request->direccion;
+        $agencia->rubro = $request->rubro;
+        $agencia->telefono = $request->telefono;
+        
+        if($agencia->save()){
+
+            Cache::tags('agencias')->flush();
+
+            return response()->json([
+                'mensaje' => 'creado con éxito',
+                'agencia' => $agencia
+            ]);
+
+        }
+        return response()->json([
+            'mensaje' => 'error'
+        ]);
     }
 
     /**
@@ -46,7 +70,13 @@ class AgenciaController extends Controller
      */
     public function show(Agencia $agencia)
     {
-        //
+        $agencia = Cache::tags('agencias')->rememberForever("messages.{id}" , function() use ($id){
+            return Agencia::find($id);
+        });
+
+        return response()->json([
+            'agencia' => $agencia
+        ]);
     }
 
     /**
@@ -55,10 +85,7 @@ class AgenciaController extends Controller
      * @param  \App\Agencia  $agencia
      * @return \Illuminate\Http\Response
      */
-    public function edit(Agencia $agencia)
-    {
-        //
-    }
+
 
     /**
      * Update the specified resource in storage.
@@ -69,7 +96,18 @@ class AgenciaController extends Controller
      */
     public function update(Request $request, Agencia $agencia)
     {
-        //
+        $agencia->nombre = $request->nombre;
+        $agencia->direccion = $request->direccion;
+        $agencia->rubro = $request->rubro;
+        $agencia->telefono = $request->telefono;
+        $agencia->save();
+
+        Cache::tags('agencias')->flush();
+
+        return response()->json([
+            'mensaje' => 'actualizado con éxito',
+            'agencia' => $agencia
+        ]);
     }
 
     /**
@@ -80,6 +118,12 @@ class AgenciaController extends Controller
      */
     public function destroy(Agencia $agencia)
     {
-        //
+        $agencia->delete();
+        
+        Cache::tags('agencias')->flush();
+
+        return response()->json([
+            'mensaje' => 'eliminado con éxito'
+        ]);
     }
 }

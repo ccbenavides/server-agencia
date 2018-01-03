@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Marca;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class MarcaController extends Controller
 {
@@ -14,7 +15,12 @@ class MarcaController extends Controller
      */
     public function index()
     {
-        $marcas = Marca::paginate(10);
+           // Cache::flush();
+        $key = "messages.page".request('page',1);
+        $marcas = Cache::tags('marcas')->rememberForever($key , function(){
+            return Marca::paginate(10);
+        });
+
         return response()->json([
             'marcas' => $marcas
         ]);
@@ -37,6 +43,9 @@ class MarcaController extends Controller
         $marca->email = $request->email;
         
         if($marca->save()){
+
+            Cache::tags('marcas')->flush();
+
             return response()->json([
                 'mensaje' => 'creado con éxito',
                 'marca' => $marca
@@ -57,6 +66,11 @@ class MarcaController extends Controller
      */
     public function show(Marca $marca)
     {
+
+        $marca = Cache::tags('marcas')->rememberForever("messages.{id}" , function() use ($id){
+            return Marca::find($id);
+        });
+
         return response()->json([
             'marca' => $marca
         ]);
@@ -79,6 +93,8 @@ class MarcaController extends Controller
         $marca->email = $request->email;
         $marca->save();
 
+        Cache::tags('marcas')->flush();
+
         return response()->json([
             'mensaje' => 'actualizado con éxito',
             'marca' => $marca
@@ -94,6 +110,9 @@ class MarcaController extends Controller
     public function destroy(Marca $marca)
     {
         $marca->delete();
+        
+        Cache::tags('marcas')->flush();
+
         return response()->json([
             'mensaje' => 'eliminado con éxito'
         ]);
