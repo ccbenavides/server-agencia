@@ -6,6 +6,8 @@ use App\Marca;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
+use App\Repositories\Marcas;
+
 class MarcaController extends Controller
 {
     /**
@@ -13,13 +15,20 @@ class MarcaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    protected $marcas;
+
+    public function __construct(Marcas $marcas){
+
+        $this->marcas = $marcas;
+
+    }
+
     public function index()
     {
            // Cache::flush();
-        $key = "messages.page".request('page',1);
-        $marcas = Cache::tags('marcas')->rememberForever($key , function(){
-            return Marca::paginate(10);
-        });
+
+        $agencias = $this->agencias->getPaginate();
 
         return response()->json([
             'marcas' => $marcas
@@ -36,25 +45,8 @@ class MarcaController extends Controller
      */
     public function store(Request $request)
     {
-        $marca = new Marca;
-        $marca->nombre = $request->nombre;
-        $marca->central = $request->central;
-        $marca->telefono = $request->telefono;
-        $marca->email = $request->email;
-        
-        if($marca->save()){
-
-            Cache::tags('marcas')->flush();
-
-            return response()->json([
-                'mensaje' => 'creado con éxito',
-                'marca' => $marca
-            ]);
-
-        }
-        return response()->json([
-            'mensaje' => 'error'
-        ]);
+        $marca = $this->marcas->store($request);
+        return response()->json($marca);
 
     }
 
@@ -67,13 +59,8 @@ class MarcaController extends Controller
     public function show(Marca $marca)
     {
 
-        $marca = Cache::tags('marcas')->rememberForever("messages.{id}" , function() use ($id){
-            return Marca::find($id);
-        });
-
-        return response()->json([
-            'marca' => $marca
-        ]);
+        $marca = $this->marcas->show($marca);
+        return response()->json($marca);
     }
 
     
@@ -87,18 +74,10 @@ class MarcaController extends Controller
      */
     public function update(Request $request, Marca $marca)
     {
-        $marca->nombre = $request->nombre;
-        $marca->central = $request->central;
-        $marca->telefono = $request->telefono;
-        $marca->email = $request->email;
-        $marca->save();
+        
+        $marca = $this->marcas->update($request, $marca);
 
-        Cache::tags('marcas')->flush();
-
-        return response()->json([
-            'mensaje' => 'actualizado con éxito',
-            'marca' => $marca
-        ]);
+        return response()->json($marca);
     }
 
     /**
@@ -109,12 +88,8 @@ class MarcaController extends Controller
      */
     public function destroy(Marca $marca)
     {
-        $marca->delete();
         
-        Cache::tags('marcas')->flush();
-
-        return response()->json([
-            'mensaje' => 'eliminado con éxito'
-        ]);
+        $marca = $this->marcas->destroy($marca);
+        return response()->json($marca);
     }
 }

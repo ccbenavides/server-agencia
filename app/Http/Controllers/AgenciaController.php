@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Agencia;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
+
+
+
+use App\Repositories\Agencias;
 
 class AgenciaController extends Controller
 {
@@ -13,16 +16,24 @@ class AgenciaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+     protected $agencias;
+
+    public function __construct(Agencias $agencias){
+        //dd("asd");
+        $this->agencias = $agencias;
+
+    }
+
     public function index()
     {
            // Cache::flush();
-           $key = "messages.page".request('page',1);
-           $agencia = Cache::tags('agencia')->rememberForever($key , function(){
-               return Agencia::paginate(10);
-           });
+
+           $agencias = $this->agencias->getPaginate();
+           
    
            return response()->json([
-               'agencia' => $agencia
+               'agencias' => $agencias
            ]);
     }
 
@@ -41,25 +52,8 @@ class AgenciaController extends Controller
      */
     public function store(Request $request)
     {
-        $agencia = new Agencia;
-        $agencia->nombre = $request->nombre;
-        $agencia->direccion = $request->direccion;
-        $agencia->rubro = $request->rubro;
-        $agencia->telefono = $request->telefono;
-        
-        if($agencia->save()){
-
-            Cache::tags('agencias')->flush();
-
-            return response()->json([
-                'mensaje' => 'creado con éxito',
-                'agencia' => $agencia
-            ]);
-
-        }
-        return response()->json([
-            'mensaje' => 'error'
-        ]);
+        $agencia = $this->agencias->store($request);
+        return response()->json($agencia);
     }
 
     /**
@@ -70,13 +64,8 @@ class AgenciaController extends Controller
      */
     public function show(Agencia $agencia)
     {
-        $agencia = Cache::tags('agencias')->rememberForever("messages.{id}" , function() use ($id){
-            return Agencia::find($id);
-        });
-
-        return response()->json([
-            'agencia' => $agencia
-        ]);
+        $agencia = $this->agencias->show($agencia);
+        return response()->json($agencia);
     }
 
     /**
@@ -96,18 +85,9 @@ class AgenciaController extends Controller
      */
     public function update(Request $request, Agencia $agencia)
     {
-        $agencia->nombre = $request->nombre;
-        $agencia->direccion = $request->direccion;
-        $agencia->rubro = $request->rubro;
-        $agencia->telefono = $request->telefono;
-        $agencia->save();
-
-        Cache::tags('agencias')->flush();
-
-        return response()->json([
-            'mensaje' => 'actualizado con éxito',
-            'agencia' => $agencia
-        ]);
+        
+        $agencia = $this->agencias->update($request, $agencia);
+        return response()->json($agencia);
     }
 
     /**
@@ -118,12 +98,8 @@ class AgenciaController extends Controller
      */
     public function destroy(Agencia $agencia)
     {
-        $agencia->delete();
         
-        Cache::tags('agencias')->flush();
-
-        return response()->json([
-            'mensaje' => 'eliminado con éxito'
-        ]);
+        $agencia = $this->agencia->destroy($agencia);
+        return response()->json($agencia);
     }
 }
