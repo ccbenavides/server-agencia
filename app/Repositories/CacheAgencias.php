@@ -43,7 +43,7 @@ class CacheAgencias implements AgenciasInterface{
 
     public function update($request, $agencia){
 
-        $agencia = $this->agencias->update($request);
+        $agencia = $this->agencias->update($request, $agencia);
         Cache::tags('agencias')->flush();
         return $agencia;
 

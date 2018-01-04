@@ -43,7 +43,7 @@ class CacheMarcas implements MarcasInterface{
 
     public function update($request, $marca){
 
-        $marca = $this->marcas->update($request);
+        $marca = $this->marcas->update($request, $marca);
         Cache::tags('marcas')->flush();
         return $marca;
 
