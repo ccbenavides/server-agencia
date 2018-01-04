@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 
 
 use App\Repositories\Agencias;
+use App\Repositories\CacheAgencias;
 
 class AgenciaController extends Controller
 {
@@ -19,7 +20,7 @@ class AgenciaController extends Controller
 
      protected $agencias;
 
-    public function __construct(Agencias $agencias){
+    public function __construct(CacheAgencias $agencias){
         //dd("asd");
         $this->agencias = $agencias;
 

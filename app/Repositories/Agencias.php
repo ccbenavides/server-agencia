@@ -5,14 +5,11 @@ namespace App\Repositories;
 use App\Agencia;
 use Illuminate\Support\Facades\Cache;
 
-class Agencias{
+class Agencias implements AgenciasInterface{
 
     public function getPaginate(){
 
-        $key = "messages.page".request('page',1);
-        return Cache::tags('agencia')->rememberForever($key , function(){
             return Agencia::paginate(10);
-        });
 
     }
 
@@ -25,8 +22,6 @@ class Agencias{
         $agencia->telefono = $request->telefono;
         
         if($agencia->save()){
-
-            Cache::tags('agencias')->flush();
 
             return [
                 'mensaje' => 'creado con éxito',
@@ -41,9 +36,9 @@ class Agencias{
     }
 
     public function show($agencia){
-        return Cache::tags('agencias')->rememberForever("messages.{id}" , function() use ($id){
+
             return Agencia::find($id);
-        });
+        
     }
 
     public function update($request, $agencia){
@@ -52,16 +47,13 @@ class Agencias{
         $agencia->rubro = $request->rubro;
         $agencia->telefono = $request->telefono;
         $agencia->save();
-        
-        Cache::tags('agencias')->flush();
 
         return $agencia;
     }
 
     public function destroy($agencia){
+
         $agencia->delete();
-        
-        Cache::tags('agencias')->flush();
 
         return $agencia;
     }

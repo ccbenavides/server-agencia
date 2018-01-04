@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 use App\Repositories\Marcas;
+use App\Repositories\CacheMarcas;
 
 class MarcaController extends Controller
 {
@@ -18,7 +19,7 @@ class MarcaController extends Controller
 
     protected $marcas;
 
-    public function __construct(Marcas $marcas){
+    public function __construct(CacheMarcas $marcas){
 
         $this->marcas = $marcas;
 
@@ -28,7 +29,7 @@ class MarcaController extends Controller
     {
            // Cache::flush();
 
-        $agencias = $this->agencias->getPaginate();
+        $marcas = $this->marcas->getPaginate();
 
         return response()->json([
             'marcas' => $marcas

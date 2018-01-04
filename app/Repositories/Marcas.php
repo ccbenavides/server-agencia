@@ -5,14 +5,11 @@ namespace App\Repositories;
 use App\Marca;
 use Illuminate\Support\Facades\Cache;
 
-class Marcas{
+class Marcas implements MarcasInterface{
 
     public function getPaginate(){
 
-        $key = "messages.page".request('page',1);
-        return Cache::tags('marcas')->rememberForever($key , function(){
             return Marca::paginate(10);
-        });
 
     }
 
@@ -25,8 +22,6 @@ class Marcas{
         $marca->email = $request->email;
         
         if($marca->save()){
-
-            Cache::tags('marcas')->flush();
 
             return [
                 'mensaje' => 'creado con éxito',
@@ -42,9 +37,7 @@ class Marcas{
 
     public function show($marca){
 
-        return Cache::tags('marcas')->rememberForever("messages.{id}" , function() use ($id){
             return Marca::find($id);
-        });
 
     }
 
@@ -55,8 +48,6 @@ class Marcas{
         $marca->email = $request->email;
         $marca->save();
 
-        Cache::tags('marcas')->flush();
-
         return $marca;
     }
 
@@ -64,8 +55,6 @@ class Marcas{
 
         $marca->delete();
         
-        Cache::tags('marcas')->flush();
-
         return $marca;
 
     }
